@@ -1,0 +1,15 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "Py1812"
+authors = [{name = "Ivica Stevanovic", email = "ivica.stevanovic@bakom.admin.ch"}]
+readme = "README.md"
+dynamic = ["version", "description"]
+dependencies = [
+    "numpy",
+]
+[project.urls]
+Home = "https://github.com/eeveetza/Py1812.git"
+

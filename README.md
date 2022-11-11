@@ -2,7 +2,7 @@
 
 This code repository contains a python software implementation of  [Recommendation ITU-R P.1812-6](https://www.itu.int/rec/R-REC-P.1812/en) with a path-specific propagation prediction method for point-to-area terrestrial services in the frequency range 30 MHz to 6000 MHz.  
 
-This is a translation of the original reference [MATLAB/Octave Implementation of Recommendation ITU-R P.1812](https://github/eeveetza/p1812) approved by ITU-R Working Party 3K and published by Study Group 3 on [ITU-R SG 3 Software, Data, and Validation Web Page](https://www.itu.int/en/ITU-R/study-groups/rsg3/Pages/iono-tropo-spheric.aspx).
+This is a development code and it is not necessarily in line with the original reference [MATLAB/Octave Implementation of Recommendation ITU-R P.1812](https://github/eeveetza/p1812) approved by ITU-R Working Party 3M and published on [ITU-R SG 3 Software, Data, and Validation Web Page](https://www.itu.int/en/ITU-R/study-groups/rsg3/Pages/iono-tropo-spheric.aspx).
 
 The package can be downloaded and installed using:
 ~~~

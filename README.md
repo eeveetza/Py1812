@@ -6,7 +6,7 @@ This is a development code and it is not necessarily in line with the original r
 
 The package can be downloaded and installed using:
 ~~~
-python -m pip install "git+https://github.com/eeveetza/Py1812/#egg=Py1812"   
+python -m pip install "git+https://github.com/eeveetza/Py1812@dev#egg=Py1812"  
 ~~~
 
 and imported as follows

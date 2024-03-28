@@ -8,6 +8,12 @@ Created on Tue 27 Sep 2022
 
 import os
 import numpy as np
+from importlib.resources import files
+
+DigitalMaps = {}
+with np.load(files("Py1812").joinpath("P1812.npz")) as DigitalMapsNpz:
+    for k in DigitalMapsNpz.files:
+        DigitalMaps[k] = DigitalMapsNpz[k].copy()
 
 
 def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kwargs):
@@ -103,8 +109,8 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
     pL = kwargs.get("pL", 50.0)
     sigmaL = kwargs.get("sigmaL", 0.0)
     Ptx = kwargs.get("Ptx", 1.0)
-    DN = kwargs.get("DN", 45.0)
-    N0 = kwargs.get("N0", 325.0)
+    DN = kwargs.get("DN", [])
+    N0 = kwargs.get("N0", [])
     dct = kwargs.get("dct", 500.0)
     dcr = kwargs.get("dcr", 500.0)
     flag4 = kwargs.get("flag4", 0)
@@ -192,6 +198,23 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
 
     if zone[-1] == 1:  # Rx at sea
         dcr = 0
+        
+    # Path center latitude
+    Re = 6371
+    dpnt = 0.5 * (d[-1] - d[0])
+    lam_path, phi_path, Bt2r, dgc = great_circle_path(lam_r, lam_t, phi_r, phi_t, Re, dpnt)
+
+    if isempty(DN):
+        # Find radio-refractivity lapse rate dN 
+        # using the digital maps at phim_e (lon), phim_n (lat) - as a bilinear interpolation
+        DN50 = DigitalMaps["DN50"]
+        DN = interp2(DN50, lam_path, phi_path, 1.5, 1.5)
+
+    if isempty(N0):
+        # Find radio-refractivity 
+        # using the digital maps at phim_e (lon), phim_n (lat) - as a bilinear interpolation
+        N050 = DigitalMaps["N050"]
+        N0 = interp2(N050, lam_path, phi_path, 1.5, 1.5)
 
     # handle number fidlog is reserved here for writing the files
     # if fidlog is already open outside of this function, the file needs to be
@@ -236,11 +259,6 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
         fid_log.write("Ct Rx ,Table 2,," + floatformat % (Ct[-2]))
 
     # Compute the path profile parameters
-
-    # Path center latitude
-    Re = 6371
-    dpnt = 0.5 * (d[-1] - d[0])
-    lam_path, phi_path, Bt2r, dgc = great_circle_path(lam_r, lam_t, phi_r, phi_t, Re, dpnt)
 
     # Compute  dtm     -   the longest continuous land (inland + coastal =34) section of the great-circle path (km)
     zone_r = 34
@@ -1841,6 +1859,40 @@ def stdDev(f, h, R, wa):
     sigmaLoc = sigmaLoc * uh
 
     return sigmaLoc
+
+def interp2(matrix_map, lon, lat, lon_spacing, lat_spacing):
+    """
+    Bi-linear interpolation of data contained in 2D matrix map at point (lon,lat)
+    It assumes that the grid is rectangular with spacing of 1.5 deg in both lon and lat
+    It assumes that lon goes from 0 to 360 deg and lat goes from 90 to -90 deg
+    """
+
+    
+    latitudeOffset = 90.0 - lat
+    longitudeOffset = lon
+    
+    if (lon < 0.0):
+        longitudeOffset = lon + 360.0
+
+    
+    sizeY, sizeX = matrix_map.shape
+
+    latitudeIndex = int(latitudeOffset / lat_spacing)
+    longitudeIndex = int(longitudeOffset / lon_spacing)
+
+    latitudeFraction = (latitudeOffset / lat_spacing) - latitudeIndex
+    longitudeFraction = (longitudeOffset / lon_spacing) - longitudeIndex
+
+    value_ul = matrix_map[latitudeIndex][longitudeIndex]
+    value_ur = matrix_map[latitudeIndex][(longitudeIndex + 1) % sizeX]
+    value_ll = matrix_map[(latitudeIndex + 1) % sizeY][longitudeIndex]
+    value_lr = matrix_map[(latitudeIndex + 1) % sizeY][(longitudeIndex + 1) % sizeX]
+
+    interpolatedHeight1 = (longitudeFraction * (value_ur - value_ul)) + value_ul
+    interpolatedHeight2 = (longitudeFraction * (value_lr - value_ll)) + value_ll
+    interpolatedHeight3 = latitudeFraction * (interpolatedHeight2 - interpolatedHeight1) + interpolatedHeight1
+
+    return interpolatedHeight3
 
 
 def isempty(x):

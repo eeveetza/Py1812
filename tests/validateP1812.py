@@ -8,7 +8,6 @@ Created on Thu Feb 20 15:50:46 2014
   Revision History:
   Date            Revision
   29SEP22         Initial impolementation
-  13NOV2023       Revised using Pandas (IS, following validatePy2001.py (Adrien Demarez))
 """
 import csv
 import sys
@@ -251,7 +250,7 @@ for filename1 in filenames:
             dcr=sg3db.dcr,
             flag4=flag4,
             debug=flag_debug,
-            fid_log=sg3db.fid_log,
+            fid_log=sg3db.fid_log
         )
 
         delta = sg3db.PredictedFieldStrength - sg3db.MeasuredFieldStrength[measID]

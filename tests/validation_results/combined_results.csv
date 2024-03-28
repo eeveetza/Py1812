@@ -47,15 +47,15 @@
  ./validation_profiles, b2iseac_rural_land_1km.csv, 0, 91.90331472, 91.90331472, -0.00000000
  ./validation_profiles, b2iseac_rural_land_1km.csv, 1, 91.63917679, 91.63917679, -0.00000000
  ./validation_profiles, b2iseac_rural_land_1km.csv, 2, 91.45198697, 91.45198697, -0.00000000
- ./validation_profiles, b2iseac_vertical.csv, 0, 49.71955351, 49.71955351, -0.00000000
- ./validation_profiles, b2iseac_vertical.csv, 1, 40.40569302, 40.40569302, 0.00000000
- ./validation_profiles, b2iseac_vertical.csv, 2, 19.45927687, 19.45927687, 0.00000000
+ ./validation_profiles, b2iseac_vertical.csv, 0, 49.71941069, 49.71941069, 0.00000000
+ ./validation_profiles, b2iseac_vertical.csv, 1, 40.40580540, 40.40580540, 0.00000000
+ ./validation_profiles, b2iseac_vertical.csv, 2, 19.45997309, 19.45997309, -0.00000000
  ./validation_profiles, b2iseac_dense_urban_land_eqdist.csv, 0, 49.84342625, 49.84342625, -0.00000000
  ./validation_profiles, b2iseac_dense_urban_land_eqdist.csv, 1, 35.08671910, 35.08671910, -0.00000000
  ./validation_profiles, b2iseac_dense_urban_land_eqdist.csv, 2, 18.86909474, 18.86909474, 0.00000000
- ./validation_profiles, b2iseac.csv, 0, 49.84494545, 49.84494545, -0.00000000
- ./validation_profiles, b2iseac.csv, 1, 40.30671606, 40.30671606, -0.00000000
- ./validation_profiles, b2iseac.csv, 2, 18.86840077, 18.86840077, -0.00000000
+ ./validation_profiles, b2iseac.csv, 0, 49.84494546, 49.84494546, -0.00000000
+ ./validation_profiles, b2iseac.csv, 1, 40.30671605, 40.30671605, -0.00000000
+ ./validation_profiles, b2iseac.csv, 2, 18.86840073, 18.86840073, 0.00000000
  ./validation_profiles, rburg_rural_noclutter_los_subpath_diffraction.csv, 0, 56.69832516, 56.69832516, 0.00000000
  ./validation_profiles, rburg_rural_noclutter_los_subpath_diffraction.csv, 1, 50.28923281, 50.28923281, -0.00000000
  ./validation_profiles, rburg_rural_noclutter_los_subpath_diffraction.csv, 2, 45.65511454, 45.65511454, 0.00000000

@@ -7,6 +7,7 @@ Created on Tue 27 Sep 2022
 """
 
 import os
+import datetime
 import numpy as np
 from importlib.resources import files
 
@@ -91,6 +92,8 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
     Rev   Date        Author                          Description
     -------------------------------------------------------------------------------
     v0    28SEP22     Ivica Stevanovic, OFCOM         Initial version
+    v1    28MAR24     Ivica Stevanovic, OFCOM         Introduced datamaps for DN and N0
+                                                      Fixed a bug with timestamp as proposed by https://github.com/drcaguiar
 
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
@@ -225,7 +228,7 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
     inside_file = 0
     if debug:
         if isempty(fid_log):
-            fid_log = open("P1812_" + str(np.floor(np.now * 1e10)) + "_log.csv", "w")
+            fid_log = open('P1812_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S%f') + '_log.csv', 'w')
             inside_file = 1
             if fid_log == -1:
                 raise IOError("The log file could not be opened")

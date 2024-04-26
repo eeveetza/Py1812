@@ -428,8 +428,6 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
 
     EpPtx = Ep + 10 * np.log10(Ptx)
 
-    Ep = EpPtx
-
     if debug:
         fid_log.write("Fi,Eq (40),," + floatformat % (Fi))
         fid_log.write("Fj,Eq (57),," + floatformat % (Fj))
@@ -459,6 +457,8 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
         fid_log.write("Lb (dB),Eq (69),," + floatformat % (Lb))
         fid_log.write("Ep (dBuV/m),Eq (70),," + floatformat % (Ep))
         fid_log.write("Ep (dBuV/m) w.r.t. Ptx,,," + floatformat % (EpPtx))
+        
+        Ep = EpPtx
 
     return Lb, Ep
 

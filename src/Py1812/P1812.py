@@ -458,7 +458,7 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
         fid_log.write("Ep (dBuV/m),Eq (70),," + floatformat % (Ep))
         fid_log.write("Ep (dBuV/m) w.r.t. Ptx,,," + floatformat % (EpPtx))
         
-        Ep = EpPtx
+    Ep = EpPtx
 
     return Lb, Ep
 

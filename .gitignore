@@ -129,3 +129,9 @@ dmypy.json
 .pyre/
 
 .DS_Store
+# Ignore all the files in the folder maps
+/src/Py1812/maps/*.*
+!/src/Py1812/maps/.gitkeep
+
+# Ignore all *.npz files
+/src/Py1812/*.npz

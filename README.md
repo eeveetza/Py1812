@@ -25,10 +25,30 @@ from Py1812 import P1812
 | File/Folder               | Description                                                         |
 |----------------------------|---------------------------------------------------------------------|
 |`/src/Py1812/P1812.py`                | python implementation of Recommendation ITU-R P.1812-6   |
+|`/src/Py1812/initiate_digital_maps.py`| python script that processes the ITU-R maps and generates the necessary `.npz` file. It needs to be run prior to using this software implementation. For details, see [Integrating ITU Digital Products](#integrating-itu-digital-products). |
 |`/tests/validateP1812.py`          | python script used to validate the implementation of Recommendation ITU-R P.1812-6 in `P1812.bt_loss()`             |
 |`/tests/validation_profiles/`    | Folder containing a proposed set of terrain profiles and inputs for validation of software implementations of this Recommendation |
 |`/tests/validation_results/`	   | Folder containing all the results written during the transmission loss computations for the set of terrain profiles defined in the folder `./validation_profiles/` |
 
+## Integrating ITU Digital Products
+
+This software uses ITU digital products that are integral part of Recommendations. These products must not be reproduced or distributed without explicit written permission from the ITU.
+
+### Setup Instructions
+
+1. **Download and extract the required maps** to `./src/Py1812/maps`:
+
+   - From ITU-R P.1812-7:
+     - `N050.TXT`
+     - `DN50.TXT`
+   
+2. **Run the script** `initiate_digital_maps.py` to generate the necessary file `P1812.npz`.
+
+### Notes
+
+- Ensure all files are placed in `./src/Py1812/maps` before running the script.
+- The script processes the maps, which are critical for the software’s functionality.
+- The resulting `*.npz` file is placed in the folder `./src/Py1812`.
 
 ## Function Call
 

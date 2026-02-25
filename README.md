@@ -1,8 +1,8 @@
 # Python Implementation of Recommendation ITU-R P.1812
 
-This code repository contains a python software implementation of  [Recommendation ITU-R P.1812-6](https://www.itu.int/rec/R-REC-P.1812/en) with a path-specific propagation prediction method for point-to-area terrestrial services in the frequency range 30 MHz to 6000 MHz.  
+This code repository contains a python software implementation of  [Recommendation ITU-R P.1812-8](https://www.itu.int/rec/R-REC-P.1812/en) with a path-specific propagation prediction method for point-to-area terrestrial services in the frequency range 30 MHz to 6000 MHz.  
 
-This code is functionally in line with the original reference [MATLAB/Octave Implementation of Recommendation ITU-R P.1812](https://github/eeveetza/p1812) approved by ITU-R Working Party 3M and published on [ITU-R SG 3 Software, Data, and Validation Web Page](https://www.itu.int/en/ITU-R/study-groups/rsg3/Pages/iono-tropo-spheric.aspx).
+<!--This code is functionally in line with the original reference [MATLAB/Octave Implementation of Recommendation ITU-R P.1812](https://github/eeveetza/p1812) approved by ITU-R Working Party 3M and published on [ITU-R SG 3 Software, Data, and Validation Web Page](https://www.itu.int/en/ITU-R/study-groups/rsg3/rwp3m/Pages/digprod.aspx).-->
 
 <!-- This is a development code and it is not necessarily in line with the original reference [MATLAB/Octave Implementation of Recommendation ITU-R P.1812](https://github/eeveetza/p1812) approved by ITU-R Working Party 3M and published on [ITU-R SG 3 Software, Data, and Validation Web Page](https://www.itu.int/en/ITU-R/study-groups/rsg3/Pages/iono-tropo-spheric.aspx).
 -->
@@ -24,9 +24,9 @@ from Py1812 import P1812
 
 | File/Folder               | Description                                                         |
 |----------------------------|---------------------------------------------------------------------|
-|`/src/Py1812/P1812.py`                | python implementation of Recommendation ITU-R P.1812-6   |
+|`/src/Py1812/P1812.py`                | python implementation of Recommendation ITU-R P.1812   |
 |`/src/Py1812/initiate_digital_maps.py`| python script that processes the ITU-R maps and generates the necessary `.npz` file. It needs to be run prior to using this software implementation. For details, see [Integrating ITU Digital Products](#integrating-itu-digital-products). |
-|`/tests/validateP1812.py`          | python script used to validate the implementation of Recommendation ITU-R P.1812-6 in `P1812.bt_loss()`             |
+|`/tests/validateP1812.py`          | python script used to validate the implementation of Recommendation ITU-R P.1812 in `P1812.bt_loss()`             |
 |`/tests/validation_profiles/`    | Folder containing a proposed set of terrain profiles and inputs for validation of software implementations of this Recommendation |
 |`/tests/validation_results/`	   | Folder containing all the results written during the transmission loss computations for the set of terrain profiles defined in the folder `./validation_profiles/` |
 
@@ -38,7 +38,7 @@ This software uses ITU digital products that are integral part of Recommendation
 
 1. **Download and extract the required maps** to `./src/Py1812/maps`:
 
-   - From ITU-R P.1812-7:
+   - From [ITU-R P.1812-8](https://www.itu.int/dms_pubrec/itu-r/rec/p/R-REC-P.1812-8-202509-I!!ZIP-E.zip):
      - `N050.TXT`
      - `DN50.TXT`
    
@@ -56,11 +56,11 @@ The function `P1812.bt_loss` can be called
 
 1. by invoking only the required input arguments:
 ~~~ 
-Lb, Ep = P1812.bt_loss (f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t,  phi_r,  lam_t,  lam_r)
+Lb, Ep = P1812.bt_loss (f, p, d, h, R, zone, htg, hrg, pol, phi_t,  phi_r,  lam_t,  lam_r)
 ~~~
 1. by invoking both the required and optional input arguments (the latter can be invoked in any order as key = value pairs):
 ~~~
-Lb, Ep = P1812.bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, \
+Lb, Ep = P1812.bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, \
             pL = val_pL, sigmaL = val_sigmaL, Ptx = val_Ptx, DN = val_DN, N0 = val_N0 \
             dct = val_dct, dcr = val_dcr, flag4 = val_flag4, debug = val_debug, fid_log = val_fid_log)
 ~~~ 
@@ -74,7 +74,6 @@ Lb, Ep = P1812.bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam
 | `d`               | array double | km    | ~0.25 ≤ `max(d)` ≤ ~3000 | Terrain profile distances (in the ascending order from the transmitter)|
 | `h`          | array double | m (asl)   |   | Terrain profile heights |
 | `R`           | array double    | m      |              |  Representative clutter heights |
-| `Ct`           | array int    |       |  1 - Water/sea, 2 - Open/rural, 3 - Suburban, 4 - Urban/trees/forest, 5 - Dense urban             |  Array of representative clutter types. If empty or all zeros, the default clutter type used is Open/rural |
 | `zone`           | array int    |       | 1 - Sea, 3 - Coastal land, 4 - Inland             |  Radio-climatic zone types |
 | `htg`           | scalar double    | m      |   1 ≤ `htg`  ≤ 3000          |  Tx antenna height above ground level |
 | `hrg`           | scalar double    | m      |   1 ≤ `hrg`  ≤ 3000          |  Rx antenna height above ground level |
@@ -119,6 +118,6 @@ The code was tested and runs on:
 
 * [Recommendation ITU-R P.1812](https://www.itu.int/rec/R-REC-P.1812/en)
 
-* [ITU-R SG 3 Software, Data, and Validation Web Page](https://www.itu.int/en/ITU-R/study-groups/rsg3/Pages/iono-tropo-spheric.aspx)
+* [ITU-R SG 3 Software, Data, and Validation Web Page](https://www.itu.int/en/ITU-R/study-groups/rsg3/rwp3m/Pages/digprod.aspx)
 
 * [MATLAB/Octave Implementation of Recommendation ITU-R P.1812](https://github/eeveetza/p1812)

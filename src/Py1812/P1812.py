@@ -2,6 +2,7 @@
 # pylint: disable=invalid-name,line-too-long,too-many-lines,too-many-arguments,too-many-locals,too-many-statements
 """
 Created on Tue 27 Sep 2022
+Modified on 25 FEB 2026: Removed obsolete argument Ct
 
 @author: eeveetza
 """
@@ -17,15 +18,15 @@ with np.load(files("Py1812").joinpath("P1812.npz")) as DigitalMapsNpz:
         DigitalMaps[k] = DigitalMapsNpz[k].copy()
 
 
-def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kwargs):
+def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kwargs):
     """
     P1812.bt_loss basic transmission loss according to P.1812-6
-    Lb = P1812.bt_lossbt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r)
+    Lb = P1812.bt_lossbt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r)
 
     This is the MAIN function that computes the basic transmission loss not exceeded for p% time
     and pL% locations, including additional losses due to terminal surroundings
     and the field strength exceeded for p% time and pL% locations
-    as defined in ITU-R P.1812-6.
+    as defined in ITU-R P.1812.
     This function:
     does not include the building entry loss (only outdoor scenarios implemented)
 
@@ -39,10 +40,6 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
     h       -   vector of heights hi of the i-th profile point (meters
                 above mean sea level.
     R       -   vector of representative clutter height Ri of the i-th profile point (m)
-    Ct      -   vector of representative clutter type Cti of the i-th profile point
-                Water/sea (1), Open/rural (2), Suburban (3),
-                Urban/trees/forest (4), Dense urban (5)
-                if empty or all zeros, the default clutter used is Open/rural
     zone    -   vector of radio-climatic zone types: Inland (4), Coastal land (3), or Sea (1)
     htg     -   Tx Antenna center heigth above ground level (m)
     hrg     -   Rx Antenna center heigth above ground level (m)
@@ -94,6 +91,7 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
     v0    28SEP22     Ivica Stevanovic, OFCOM         Initial version
     v1    28MAR24     Ivica Stevanovic, OFCOM         Introduced datamaps for DN and N0
                                                       Fixed a bug with timestamp as proposed by https://github.com/drcaguiar
+          25FEB26     Ivica Stevanovic, OFCOM         Removed obsolete argument Ct
 
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
@@ -180,16 +178,6 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
     elif not (len(R) == NN):
         raise ValueError("The number of elements in the array d and the array R must be the same.")
 
-    if isempty(Ct):
-        Ct = 2 * np.ones(h.shape)  # default is Open/rural clutter type
-
-    elif Ct.any() == 0:
-        Ct = 2 * np.ones(h.shape)
-        # default is Open/rural clutter type
-    else:
-        if not (len(Ct) == NN):
-            raise ValueError("The number of elements in the array d and the array Ct must be the same.")
-
     if isempty(zone):
         zone = 4 * np.ones(h.shape)  # default is Inland radio-meteorological zone
     else:
@@ -258,8 +246,7 @@ def bt_loss(f, p, d, h, R, Ct, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, 
         fid_log.write("dcr (km) ,,," + floatformat % (dcr))
         fid_log.write("R2 (m) ,,," + floatformat % (R[1]))
         fid_log.write("Rn-1 (m) ,,," + floatformat % (R[-2]))
-        fid_log.write("Ct Tx ,Table 2,," + floatformat % (Ct[1]))
-        fid_log.write("Ct Rx ,Table 2,," + floatformat % (Ct[-2]))
+
 
     # Compute the path profile parameters
 

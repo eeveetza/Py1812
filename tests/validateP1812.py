@@ -8,6 +8,7 @@ Created on Thu Feb 20 15:50:46 2014
   Revision History:
   Date            Revision
   29SEP22         Initial impolementation
+  25FEB26         Removed obsolete argument Ct
 """
 import csv
 import sys
@@ -232,7 +233,6 @@ for filename1 in filenames:
             sg3db.x,
             sg3db.h_gamsl,
             sg3db.h_ground_cover,
-            sg3db.coveragecode,
             sg3db.radio_met_code,
             sg3db.hTx[measID],
             sg3db.hRx[measID],

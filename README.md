@@ -58,11 +58,12 @@ The function `P1812.bt_loss` can be called
 ~~~ 
 Lb, Ep = P1812.bt_loss (f, p, d, h, R, zone, htg, hrg, pol, phi_t,  phi_r,  lam_t,  lam_r)
 ~~~
-1. by invoking both the required and optional input arguments (the latter can be invoked in any order as key = value pairs):
+2. by invoking both the required and optional input arguments (the latter can be invoked in any order as key = value pairs):
 ~~~
 Lb, Ep = P1812.bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, \
-            pL = val_pL, sigmaL = val_sigmaL, Ptx = val_Ptx, DN = val_DN, N0 = val_N0 \
-            dct = val_dct, dcr = val_dcr, flag4 = val_flag4, debug = val_debug, fid_log = val_fid_log)
+            pL = val_pL, sigmaL = val_sigmaL, Ptx = val_Ptx, Gtx = val_Gtx, Grx = val_Grx, \ 
+            DN = val_DN, N0 = val_N0, dct = val_dct, dcr = val_dcr, \
+            flag4 = val_flag4, debug = val_debug, fid_log = val_fid_log)
 ~~~ 
 
 ## Required input arguments of function `tl_p1812`
@@ -90,7 +91,9 @@ Lb, Ep = P1812.bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, 
 |-------------------|--------|-------|--------------|--------------|
 | `pL`           | scalar double    | %      |   1 ≤ `pL`  ≤ 99          |  Location percentage for which the calculated basic transmission loss is not exceeded. Default is 50%. |
 | `sigmaL`           | scalar double    | dB      |             |  location variability standard deviations computed using stdDev.m according to §4.8 and §4.10; the value of 5.5 dB used for planning Broadcasting DTT; Default: 0 dB. |
-| `Ptx`           | scalar double    | kW      |   `Ptx` > 0          |  Tx power; Default: 1. |
+| `Ptx`           | scalar double    | kW      |   `Ptx` > 0          |  Tx power (e.r.p.); Default: 1. |
+  `Gtx`           | scalar double    | dBi     |                      | Tx antenna gain (dBi) in the Rx direction  (default 0 dBi) |
+  `Grx`           | scalar double    | dBi     |                      | Rx antenna gain (dBi) in the Tx direction  (default 0 dBi) |
 | `DN`            | scalar double    | N-units/km      | `DN`> 0           | The average radio-refractivity lapse-rate through the lowest 1 km of the atmosphere at the path-center. It can be derived from an appropriate map. Default: 45. |
 | `N0`           | scalar double    | N-units      |             | The sea-level surface refractivity at the path-centre. It can be derived from an appropriate map. Default: 325.|
 | `dct`           | scalar double    | km      |   `dct` ≥ 0          |  Distance over land from the Tx antenna to the coast along the great-circle interference path. Default: 500 km. Set to zero for a terminal on a ship or sea platform.|

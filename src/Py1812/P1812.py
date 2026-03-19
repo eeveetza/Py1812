@@ -3,6 +3,7 @@
 """
 Created on Tue 27 Sep 2022
 Modified on 25 FEB 2026: Removed obsolete argument Ct
+Modified on 16 MAR 2026: Included optional arguments Gtx and Grx
 
 @author: eeveetza
 """
@@ -21,7 +22,7 @@ with np.load(files("Py1812").joinpath("P1812.npz")) as DigitalMapsNpz:
 def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kwargs):
     """
     P1812.bt_loss basic transmission loss according to P.1812-6
-    Lb = P1812.bt_lossbt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r)
+    Lb, Ep = P1812.bt_lossbt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r)
 
     This is the MAIN function that computes the basic transmission loss not exceeded for p% time
     and pL% locations, including additional losses due to terminal surroundings
@@ -56,6 +57,8 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
                 stdDev.m according to §4.8 and §4.10
                 the value of 5.5 dB used for planning Broadcasting DTT
     Ptx     -   Transmitter power (kW), default value 1 kW
+    Gtx     -   Tx antenna gain (dBi) in the Rx direction  (default 0 dBi)
+    Grx     -   Rx antenna gain (dBi) in the Tx direction (default 0 dBi)
     DN      -   The average radio-refractive index lapse-rate through the
                 lowest 1 km of the atmosphere (it is a positive quantity in this
                 procedure) (N-units/km)
@@ -78,13 +81,14 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
 
 
     Output parameters:
-    Lb     -   basic  transmission loss according to P.1812-6
+    Lb     -   basic  transmission loss according to P.1812 (dB)
+    Ep     -   field strength at the receiver accounting for antenna gains and Tx power (dBuV/m)
 
     Example:
     1) Call with required input parameters
-    Lb = bt_loss(f,p,d,h,R,Ct,zone,htg,hrg,pol,phi_t,phi_r,lam_t,lam_r)
+    Lb, Ep = bt_loss(f,p,d,h,R,Ct,zone,htg,hrg,pol,phi_t,phi_r,lam_t,lam_r)
     2) Call with required input parameters and optional input parameters as keyword
-    Lb = bt_loss(f,p,d,h,R,Ct,zone,htg,hrg,pol,phi_t,phi_r,lam_t,lam_r,DN = 50, N0 = 400)
+    Lb, Ep = bt_loss(f,p,d,h,R,Ct,zone,htg,hrg,pol,phi_t,phi_r,lam_t,lam_r,DN = 50, N0 = 400, Gtx = 20)
 
     Rev   Date        Author                          Description
     -------------------------------------------------------------------------------
@@ -92,6 +96,7 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
     v1    28MAR24     Ivica Stevanovic, OFCOM         Introduced datamaps for DN and N0
                                                       Fixed a bug with timestamp as proposed by https://github.com/drcaguiar
           25FEB26     Ivica Stevanovic, OFCOM         Removed obsolete argument Ct
+          16MAR26     Ivica Stevanovic, OFCOM         Introduced optional arguments Gtx and Grx
 
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
@@ -117,6 +122,8 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
     flag4 = kwargs.get("flag4", 0)
     debug = kwargs.get("debug", 0)
     fid_log = kwargs.get("fid_log", [])
+    Gtx = kwargs.get("Gtx", 0.0)
+    Grx = kwargs.get("Grx", 0.0)
 
     # Ensure that vector d is ascending
     if not issorted(d):
@@ -229,6 +236,8 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
     if debug:
         fid_log.write("# Parameter,Ref,,Value,\n")
         fid_log.write("Ptx (kW),,," + floatformat % (Ptx))
+        fid_log.write("Gtx (dBi),,," + floatformat % (Gtx))
+        fid_log.write("Grx (dBi),,," + floatformat % (Grx))
         fid_log.write("f (GHz),,," + floatformat % (f))
         fid_log.write("p (%),,," + floatformat % (p))
         fid_log.write("pL (%),,," + floatformat % (pL))
@@ -411,9 +420,9 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
 
     Ep = 199.36 + 20 * np.log10(f) - Lb  # eq (70)
 
-    # Scale to the transmitter power
-
-    EpPtx = Ep + 10 * np.log10(Ptx)
+    # Scale to the transmitter power and apply antenna gains
+    
+    EpPtx = Ep + 10 * np.log10(Ptx) + Gtx + Grx
 
     if debug:
         fid_log.write("Fi,Eq (40),," + floatformat % (Fi))
@@ -443,11 +452,10 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
         fid_log.write("Lbc (dB),Eq (63),," + floatformat % (Lbc))
         fid_log.write("Lb (dB),Eq (69),," + floatformat % (Lb))
         fid_log.write("Ep (dBuV/m),Eq (70),," + floatformat % (Ep))
-        fid_log.write("Ep (dBuV/m) w.r.t. Ptx,,," + floatformat % (EpPtx))
+        fid_log.write("Ep (dBuV/m) w.r.t. Ptx, Gtx, Grx,,," + floatformat % (EpPtx))
         
-    Ep = EpPtx
 
-    return Lb, Ep
+    return Lb, EpPtx
 
 
 def tl_tropo(dtot, theta, f, p, N0):

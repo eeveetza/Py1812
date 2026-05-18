@@ -4,6 +4,7 @@
 Created on Tue 27 Sep 2022
 Modified on 25 FEB 2026: Removed obsolete argument Ct
 Modified on 16 MAR 2026: Included optional arguments Gtx and Grx
+Modified on 18 MAY 2026: Patch resolving issue #9
 
 @author: eeveetza
 """
@@ -97,6 +98,7 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
                                                       Fixed a bug with timestamp as proposed by https://github.com/drcaguiar
           25FEB26     Ivica Stevanovic, OFCOM         Removed obsolete argument Ct
           16MAR26     Ivica Stevanovic, OFCOM         Introduced optional arguments Gtx and Grx
+          18MAY26     Ivica Stevanovic, OFCOM         Fixed a bug with ^ instead of ** as proposed by https://github.com/torstewo
 
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
@@ -127,17 +129,23 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
 
     # Ensure that vector d is ascending
     if not issorted(d):
-        raise ValueError("The array of path profile points d(i) must be in ascending order.")
+        raise ValueError(
+            "The array of path profile points d(i) must be in ascending order."
+        )
 
     # Ensure that d[0] = 0 (Tx position)
     if d[0] > 0.0:
-        raise ValueError("The first path profile point d[0] = " + str(d[0]) + " must be zero.")
+        raise ValueError(
+            "The first path profile point d[0] = " + str(d[0]) + " must be zero."
+        )
 
     # verify input argument values and limits
 
     if not (f >= 0.03 and f <= 6.0):
         print("Warning: frequency must be in the range [0.03, 6] GHz. ")
-        print("Computation will continue but the parameters are outside of the valid domain.")
+        print(
+            "Computation will continue but the parameters are outside of the valid domain."
+        )
 
     if not (p >= 1 and p <= 50):
         raise ValueError("The time percentage must be in the range [1, 50]%")
@@ -149,7 +157,9 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
         raise ValueError("The Rx antenna height must be in the range [1, 3000] m")
 
     if not (pol == 1 or pol == 2):
-        raise ValueError("The polarization pol can be either 1 (horizontal) or 2 (vertical).")
+        raise ValueError(
+            "The polarization pol can be either 1 (horizontal) or 2 (vertical)."
+        )
 
     # make sure that there is enough points in the path profile
     if len(d) <= 4:
@@ -157,7 +167,9 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
 
     xx = np.logical_or(zone == 1, np.logical_or(zone == 3, zone == 4))
     if np.any(xx == False):
-        raise ValueError("The vector of radio-climatic zones zone may only contain integers 1, 3, or 4.")
+        raise ValueError(
+            "The vector of radio-climatic zones zone may only contain integers 1, 3, or 4."
+        )
 
     if not (pL > 0 and pL < 100):
         raise ValueError("The location percentage must be in the range (0, 100)%")
@@ -178,12 +190,16 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
 
     # the number of elements in d and path need to be the same
     if not (len(h) == NN):
-        raise ValueError("The number of elements in the array d and the array h must be the same.")
+        raise ValueError(
+            "The number of elements in the array d and the array h must be the same."
+        )
 
     if isempty(R):
         R = np.zeros(h.shape)  # default is clutter height zero
     elif not (len(R) == NN):
-        raise ValueError("The number of elements in the array d and the array R must be the same.")
+        raise ValueError(
+            "The number of elements in the array d and the array R must be the same."
+        )
 
     if isempty(zone):
         zone = 4 * np.ones(h.shape)  # default is Inland radio-meteorological zone
@@ -196,20 +212,22 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
 
     if zone[-1] == 1:  # Rx at sea
         dcr = 0
-        
+
     # Path center latitude
     Re = 6371
     dpnt = 0.5 * (d[-1] - d[0])
-    lam_path, phi_path, Bt2r, dgc = great_circle_path(lam_r, lam_t, phi_r, phi_t, Re, dpnt)
+    lam_path, phi_path, Bt2r, dgc = great_circle_path(
+        lam_r, lam_t, phi_r, phi_t, Re, dpnt
+    )
 
     if isempty(DN):
-        # Find radio-refractivity lapse rate dN 
+        # Find radio-refractivity lapse rate dN
         # using the digital maps at phim_e (lon), phim_n (lat) - as a bilinear interpolation
         DN50 = DigitalMaps["DN50"]
         DN = interp2(DN50, lam_path, phi_path, 1.5, 1.5)
 
     if isempty(N0):
-        # Find radio-refractivity 
+        # Find radio-refractivity
         # using the digital maps at phim_e (lon), phim_n (lat) - as a bilinear interpolation
         N050 = DigitalMaps["N050"]
         N0 = interp2(N050, lam_path, phi_path, 1.5, 1.5)
@@ -223,7 +241,12 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
     inside_file = 0
     if debug:
         if isempty(fid_log):
-            fid_log = open('P1812_' + datetime.datetime.now().strftime('%Y%m%d%H%M%S%f') + '_log.csv', 'w')
+            fid_log = open(
+                "P1812_"
+                + datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
+                + "_log.csv",
+                "w",
+            )
             inside_file = 1
             if fid_log == -1:
                 raise IOError("The log file could not be opened")
@@ -256,7 +279,6 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
         fid_log.write("R2 (m) ,,," + floatformat % (R[1]))
         fid_log.write("Rn-1 (m) ,,," + floatformat % (R[-2]))
 
-
     # Compute the path profile parameters
 
     # Compute  dtm     -   the longest continuous land (inland + coastal =34) section of the great-circle path (km)
@@ -278,7 +300,23 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
 
     # Derive parameters for the path profile analysis
 
-    hst_n, hsr_n, hst, hsr, hstd, hsrd, hte, hre, hm, dlt, dlr, theta_t, theta_r, theta, pathtype = smooth_earth_heights(d, h, R, htg, hrg, ae, f)
+    (
+        hst_n,
+        hsr_n,
+        hst,
+        hsr,
+        hstd,
+        hsrd,
+        hte,
+        hre,
+        hm,
+        dlt,
+        dlr,
+        theta_t,
+        theta_r,
+        theta,
+        pathtype,
+    ) = smooth_earth_heights(d, h, R, htg, hrg, ae, f)
 
     dtot = d[-1] - d[0]
 
@@ -345,7 +383,9 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
 
     Lbfs, Lb0p, Lb0b = pl_los(dtot, hts, hrs, f, p, b0, dlt, dlr)
 
-    Ldp, Ldb, Ld50, Lbulla50, Lbulls50, Ldsph50 = dl_p(d, g, htc, hrc, hstd, hsrd, f, omega, p, b0, DN, flag4)
+    Ldp, Ldb, Ld50, Lbulla50, Lbulls50, Ldsph50 = dl_p(
+        d, g, htc, hrc, hstd, hsrd, f, omega, p, b0, DN, flag4
+    )
 
     # The median basic transmission loss associated with diffraction Eq (42)
 
@@ -374,7 +414,26 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
 
     eta = 2.5
 
-    Lba = tl_anomalous(dtot, dlt, dlr, dct, dcr, dlm, hts, hrs, hte, hre, hm, theta_t, theta_r, f, p, omega, ae, b0)
+    Lba = tl_anomalous(
+        dtot,
+        dlt,
+        dlr,
+        dct,
+        dcr,
+        dlm,
+        hts,
+        hrs,
+        hte,
+        hre,
+        hm,
+        theta_t,
+        theta_r,
+        f,
+        p,
+        omega,
+        ae,
+        b0,
+    )
 
     Lminbap = eta * np.log(np.exp(Lba / eta) + np.exp(Lb0p / eta))  # eq (60)
 
@@ -421,7 +480,7 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
     Ep = 199.36 + 20 * np.log10(f) - Lb  # eq (70)
 
     # Scale to the transmitter power and apply antenna gains
-    
+
     EpPtx = Ep + 10 * np.log10(Ptx) + Gtx + Grx
 
     if debug:
@@ -453,7 +512,6 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
         fid_log.write("Lb (dB),Eq (69),," + floatformat % (Lb))
         fid_log.write("Ep (dBuV/m),Eq (70),," + floatformat % (Ep))
         fid_log.write("Ep (dBuV/m) w.r.t. Ptx, Gtx, Grx,,," + floatformat % (EpPtx))
-        
 
     return Lb, EpPtx
 
@@ -494,12 +552,38 @@ def tl_tropo(dtot, theta, f, p, N0):
     # the basic transmission loss due to troposcatter not exceeded for any time
     # percentage p, below 50# is given
 
-    Lbs = 190.1 + Lf + 20 * np.log10(dtot) + 0.573 * theta - 0.15 * N0 - 10.125 * (np.log10(50.0 / p)) ** (0.7)
+    Lbs = (
+        190.1
+        + Lf
+        + 20 * np.log10(dtot)
+        + 0.573 * theta
+        - 0.15 * N0
+        - 10.125 * (np.log10(50.0 / p)) ** (0.7)
+    )
 
     return Lbs
 
 
-def tl_anomalous(dtot, dlt, dlr, dct, dcr, dlm, hts, hrs, hte, hre, hm, theta_t, theta_r, f, p, omega, ae, b0):
+def tl_anomalous(
+    dtot,
+    dlt,
+    dlr,
+    dct,
+    dcr,
+    dlm,
+    hts,
+    hrs,
+    hte,
+    hre,
+    hm,
+    theta_t,
+    theta_r,
+    f,
+    p,
+    omega,
+    ae,
+    b0,
+):
     """
     tl_anomalous Basic transmission loss due to anomalous propagation according to P.452-17
     Lba = tl_anomalous(dtot, dlt, dlr, dct, dcr, dlm, hts, hrs, hte, hre, hm, theta_t, theta_r, f, p, omega, ae, b0)
@@ -560,10 +644,14 @@ def tl_anomalous(dtot, dlt, dlr, dct, dcr, dlm, hts, hrs, hte, hre, hm, theta_t,
     Asr = 0
 
     if theta_t2 > 0:
-        Ast = 20 * np.log10(1 + 0.361 * theta_t2 * np.sqrt(f * dlt)) + 0.264 * theta_t2 * f ** (1.0 / 3.0)
+        Ast = 20 * np.log10(
+            1 + 0.361 * theta_t2 * np.sqrt(f * dlt)
+        ) + 0.264 * theta_t2 * f ** (1.0 / 3.0)
 
     if theta_r2 > 0:
-        Asr = 20 * np.log10(1 + 0.361 * theta_r2 * np.sqrt(f * dlr)) + 0.264 * theta_r2 * f ** (1.0 / 3.0)
+        Asr = 20 * np.log10(
+            1 + 0.361 * theta_r2 * np.sqrt(f * dlr)
+        ) + 0.264 * theta_r2 * f ** (1.0 / 3.0)
 
     # over-sea surface duct coupling correction for the interfering and
     # interfered-with stations (49) and (49a)
@@ -625,11 +713,21 @@ def tl_anomalous(dtot, dlt, dlr, dct, dcr, dlm, hts, hrs, hte, hre, hm, theta_t,
 
     # beta = max(beta, eps)      # to avoid division by zero
 
-    Gamma = 1.076 / (2.0058 - np.log10(beta)) ** 1.012 * np.exp(-(9.51 - 4.8 * np.log10(beta) + 0.198 * (np.log10(beta)) ** 2) * 1e-6 * dtot ** (1.13))  # eq (53a)
+    Gamma = (
+        1.076
+        / (2.0058 - np.log10(beta)) ** 1.012
+        * np.exp(
+            -(9.51 - 4.8 * np.log10(beta) + 0.198 * (np.log10(beta)) ** 2)
+            * 1e-6
+            * dtot ** (1.13)
+        )
+    )  # eq (53a)
 
     # time percentage variablity (cumulative distribution):
 
-    Ap = -12 + (1.2 + 3.7e-3 * dtot) * np.log10(p / beta) + 12 * (p / beta) ** Gamma  # eq (53)
+    Ap = (
+        -12 + (1.2 + 3.7e-3 * dtot) * np.log10(p / beta) + 12 * (p / beta) ** Gamma
+    )  # eq (53)
 
     # time percentage and angular-distance dependent losses within the
     # anomalous propagation mechanism
@@ -640,7 +738,16 @@ def tl_anomalous(dtot, dlt, dlr, dct, dcr, dlm, hts, hrs, hte, hre, hm, theta_t,
     # the antennas and the anomalous propagation structure within the
     # atmosphere (47)
 
-    Af = 102.45 + 20 * np.log10(f) + 20 * np.log10(dlt + dlr) + Alf + Ast + Asr + Act + Acr
+    Af = (
+        102.45
+        + 20 * np.log10(f)
+        + 20 * np.log10(dlt + dlr)
+        + Alf
+        + Ast
+        + Asr
+        + Act
+        + Acr
+    )
 
     # total basic transmission loss occuring during periods of anomalaous
     # propagation (46)
@@ -699,9 +806,12 @@ def smooth_earth_heights(d, h, R, htg, hrg, ae, f):
     hrc = hrs
 
     # Section 5.6.1 Deriving the smooth-Earth surface
-    ii = np.arange(1,n)
-    v1 = ((d[ii] - d[ii - 1]) * (h[ii] + h[ii - 1])).sum()   # Eq (85)
-    v2 = ((d[ii] - d[ii - 1]) * (h[ii] * (2 * d[ii] + d[ii - 1]) + h[ii - 1] * (d[ii] + 2 * d[ii - 1]))).sum()  # Eq (86)
+    ii = np.arange(1, n)
+    v1 = ((d[ii] - d[ii - 1]) * (h[ii] + h[ii - 1])).sum()  # Eq (85)
+    v2 = (
+        (d[ii] - d[ii - 1])
+        * (h[ii] * (2 * d[ii] + d[ii - 1]) + h[ii - 1] * (d[ii] + 2 * d[ii - 1]))
+    ).sum()  # Eq (86)
 
     hst = (2 * v1 * dtot - v2) / dtot**2  # Eq (87)
     hsr = (v2 - v1 * dtot) / dtot**2  # Eq (88)
@@ -747,12 +857,18 @@ def smooth_earth_heights(d, h, R, htg, hrg, ae, f):
 
     ii = range(1, n - 1)
 
-    theta = 1000 * np.arctan((h[ii] - hts) / (1000 * d[ii]) - d[ii] / (2 * ae))  # Eq (77)
+    theta = 1000 * np.arctan(
+        (h[ii] - hts) / (1000 * d[ii]) - d[ii] / (2 * ae)
+    )  # Eq (77)
 
     # theta(theta < 0) = 0  # condition below equation (152)
 
-    theta_td = 1000 * np.arctan((hrs - hts) / (1000 * dtot) - dtot / (2 * ae))  # Eq (78)
-    theta_rd = 1000 * np.arctan((hts - hrs) / (1000 * dtot) - dtot / (2 * ae))  # Eq (81)
+    theta_td = 1000 * np.arctan(
+        (hrs - hts) / (1000 * dtot) - dtot / (2 * ae)
+    )  # Eq (78)
+    theta_rd = 1000 * np.arctan(
+        (hts - hrs) / (1000 * dtot) - dtot / (2 * ae)
+    )  # Eq (81)
 
     theta_max = max(theta)  # Eq (76)
     if theta_max > theta_td:  # Eq (150): test for the trans-horizon path
@@ -765,19 +881,25 @@ def smooth_earth_heights(d, h, R, htg, hrg, ae, f):
     if pathtype == 2:  # transhorizon
         (kindex,) = np.where(theta == theta_max)
 
-        lt = kindex[0] + 1  # in order to map back to path d indices, as theta takes path indices 2 to n-1,
+        lt = (
+            kindex[0] + 1
+        )  # in order to map back to path d indices, as theta takes path indices 2 to n-1,
 
         dlt = d[lt]  # Eq (80)
 
         # Interfered-with antenna horizon elevation angle and distance
 
-        theta = 1000 * np.arctan((h[ii] - hrs) / (1000 * (dtot - d[ii])) - (dtot - d[ii]) / (2 * ae))  # Eq (82a)
+        theta = 1000 * np.arctan(
+            (h[ii] - hrs) / (1000 * (dtot - d[ii])) - (dtot - d[ii]) / (2 * ae)
+        )  # Eq (82a)
 
         theta_r = max(theta)
 
         (kindex,) = np.where(theta == theta_r)
 
-        lr = kindex[-1] + 1  # in order to map back to path d indices, as theta takes path indices 2 to n-1,
+        lr = (
+            kindex[-1] + 1
+        )  # in order to map back to path d indices, as theta takes path indices 2 to n-1,
 
         dlr = dtot - d[lr]  # Eq (83)
 
@@ -790,11 +912,19 @@ def smooth_earth_heights(d, h, R, htg, hrg, ae, f):
         lam = 0.2998 / f
         Ce = 1.0 / ae  # Section 4.3.1 supposing median effective Earth radius
 
-        nu = (h[ii] + 500 * Ce * d[ii] * (dtot - d[ii]) - (hts * (dtot - d[ii]) + hrs * d[ii]) / dtot) * np.sqrt(0.002 * dtot / (lam * d[ii] * (dtot - d[ii])))  # Eq (81)
+        nu = (
+            h[ii]
+            + 500 * Ce * d[ii] * (dtot - d[ii])
+            - (hts * (dtot - d[ii]) + hrs * d[ii]) / dtot
+        ) * np.sqrt(
+            0.002 * dtot / (lam * d[ii] * (dtot - d[ii]))
+        )  # Eq (81)
         numax = max(nu)
 
         (kindex,) = np.where(nu == numax)
-        lt = kindex[-1] + 1  # in order to map back to path d indices, as theta takes path indices 2 to n-1,
+        lt = (
+            kindex[-1] + 1
+        )  # in order to map back to path d indices, as theta takes path indices 2 to n-1,
         dlt = d[lt]  # Eq (80)
         dlr = dtot - dlt  # Eq  (83a)
         lr = lt
@@ -824,7 +954,23 @@ def smooth_earth_heights(d, h, R, htg, hrg, ae, f):
 
     hm = max(h[ii] - (hst + m * d[ii]))  # Eq (95)
 
-    return hst_n, hsr_n, hst, hsr, hstd, hsrd, hte, hre, hm, dlt, dlr, theta_t, theta_r, theta_tot, pathtype
+    return (
+        hst_n,
+        hsr_n,
+        hst,
+        hsr,
+        hstd,
+        hsrd,
+        hte,
+        hre,
+        hm,
+        dlt,
+        dlr,
+        theta_t,
+        theta_r,
+        theta_tot,
+        pathtype,
+    )
 
 
 def pl_los(d, hts, hrs, f, p, b0, dlt, dlr):
@@ -1015,7 +1161,9 @@ def C(z):  # eq (97)
     D2 = 0.189269
     D3 = 0.001308
 
-    return (((C2 * T(z) + C1) * T(z)) + C0) / (((D3 * T(z) + D2) * T(z) + D1) * T(z) + 1)  # eq (97b)
+    return (((C2 * T(z) + C1) * T(z)) + C0) / (
+        ((D3 * T(z) + D2) * T(z) + D1) * T(z) + 1
+    )  # eq (97b)
 
 
 def great_circle_path(Phire, Phite, Phirn, Phitn, Re, dpnt):
@@ -1250,13 +1398,19 @@ def dl_se_ft_inner(epsr, sigma, d, hte, hre, adft, f):
 
     K = np.zeros(2)
 
-    K[0] = 0.036 * (adft * f) ** (-1.0 / 3.0) * ((epsr - 1) ** 2 + (18 * sigma / f) ** 2.0) ** (-1.0 / 4.0)  # Eq (29a)
+    K[0] = (
+        0.036
+        * (adft * f) ** (-1.0 / 3.0)
+        * ((epsr - 1) ** 2 + (18 * sigma / f) ** 2.0) ** (-1.0 / 4.0)
+    )  # Eq (29a)
 
     K[1] = K[0] * (epsr**2 + (18 * sigma / f) ** 2) ** (1.0 / 2.0)  # Eq (29b)
 
     # Earth ground/polarization parameter
 
-    beta_dft = (1 + 1.6 * K**2 + 0.67 * K**4) / (1 + 4.5 * K**2 + 1.53 * K**4)  # Eq (30)
+    beta_dft = (1 + 1.6 * K**2 + 0.67 * K**4) / (
+        1 + 4.5 * K**2 + 1.53 * K**4
+    )  # Eq (30)
 
     # Normalized distance
 
@@ -1337,7 +1491,6 @@ def dl_se_ft(d, hte, hre, adft, f, omega):
 
     # First-term part of the spherical-Earth diffraction loss over land
 
-
     Ldft_land = dl_se_ft_inner(22, 0.003, d, hte, hre, adft, f)
 
     # First-term part of the spherical-Earth diffraction loss over sea
@@ -1401,12 +1554,21 @@ def dl_se(d, hte, hre, ap, f, omega):
         c = (hte - hre) / (hte + hre)  # Eq (24d)
         m = 250 * d * d / (ap * (hte + hre))  # Eq (24e)
 
-        b = 2 * np.sqrt((m + 1.0) / (3.0 * m)) * np.cos(np.pi / 3 + 1.0 / 3.0 * np.arccos(3 * c / 2.0 * np.sqrt(3.0 * m / (m + 1.0) ** 3)))  # Eq (24c)
+        b = (
+            2
+            * np.sqrt((m + 1.0) / (3.0 * m))
+            * np.cos(
+                np.pi / 3
+                + 1.0 / 3.0 * np.arccos(3 * c / 2.0 * np.sqrt(3.0 * m / (m + 1.0) ** 3))
+            )
+        )  # Eq (24c)
 
         dse1 = d / 2.0 * (1.0 + b)  # Eq (24a)
         dse2 = d - dse1  # Eq (24b)
 
-        hse = (hte - 500 * dse1 * dse1 / ap) * dse2 + (hre - 500 * dse2 * dse2 / ap) * dse1
+        hse = (hte - 500 * dse1 * dse1 / ap) * dse2 + (
+            hre - 500 * dse2 * dse2 / ap
+        ) * dse1
         hse = hse / d  # Eq (23)
 
         # Calculate the required clearance for zero diffraction loss
@@ -1486,12 +1648,16 @@ def dl_p(d, g, hts, hrs, hstd, hsrd, f, omega, p, b0, DN, flag4):
 
     ap = ae
 
-    Ld50, Lbulla50, Lbulls50, Ldsph50 = dl_delta_bull(d, g, hts, hrs, hstd, hsrd, ap, f, omega, flag4)
+    Ld50, Lbulla50, Lbulls50, Ldsph50 = dl_delta_bull(
+        d, g, hts, hrs, hstd, hsrd, ap, f, omega, flag4
+    )
 
     if p == 50:
         Ldp = Ld50
         ap = ab
-        Ldb, Lbulla50, Lbulls50, Ldsph50 = dl_delta_bull(d, g, hts, hrs, hstd, hsrd, ap, f, omega, flag4)
+        Ldb, Lbulla50, Lbulls50, Ldsph50 = dl_delta_bull(
+            d, g, hts, hrs, hstd, hsrd, ap, f, omega, flag4
+        )
         return Ldp, Ldb, Ld50, Lbulla50, Lbulls50, Ldsph50
 
     if p < 50:
@@ -1501,7 +1667,9 @@ def dl_p(d, g, hts, hrs, hstd, hsrd, f, omega, p, b0, DN, flag4):
 
         ap = ab
 
-        Ldb, Lbulla50, Lbulls50, Ldsph50 = dl_delta_bull(d, g, hts, hrs, hstd, hsrd, ap, f, omega, flag4)
+        Ldb, Lbulla50, Lbulls50, Ldsph50 = dl_delta_bull(
+            d, g, hts, hrs, hstd, hsrd, ap, f, omega, flag4
+        )
 
         # Compute the interpolation factor Fi
 
@@ -1660,11 +1828,16 @@ def dl_bull(d, g, hts, hrs, ap, f):
         # Find the intermediate profile point with the highest diffraction
         # parameter nu:
 
-        numax = max((gi + 500 * Ce * di * (dtot - di) - (hts * (dtot - di) + hrs * di) / dtot) * np.sqrt(0.002 * dtot / (lam * di * (dtot - di))))  # Eq (15)
+        numax = max(
+            (gi + 500 * Ce * di * (dtot - di) - (hts * (dtot - di) + hrs * di) / dtot)
+            * np.sqrt(0.002 * dtot / (lam * di * (dtot - di)))
+        )  # Eq (15)
 
         Luc = 0
         if numax > -0.78:
-            Luc = 6.9 + 20 * np.log10(np.sqrt((numax - 0.1) ** 2 + 1) + numax - 0.1)  # Eq (12), (16)
+            Luc = 6.9 + 20 * np.log10(
+                np.sqrt((numax - 0.1) ** 2 + 1) + numax - 0.1
+            )  # Eq (12), (16)
 
     else:
         # Path is transhorizon
@@ -1680,13 +1853,17 @@ def dl_bull(d, g, hts, hrs, ap, f):
 
         # Calculate the diffraction parameter, nub, for the Bullington point
 
-        nub = (hts + Stim * dbp - (hts * (dtot - dbp) + hrs * dbp) / dtot) * np.sqrt(0.002 * dtot / (lam * dbp * (dtot - dbp)))  # Eq (20)
+        nub = (hts + Stim * dbp - (hts * (dtot - dbp) + hrs * dbp) / dtot) * np.sqrt(
+            0.002 * dtot / (lam * dbp * (dtot - dbp))
+        )  # Eq (20)
 
         # The knife-edge loss for the Bullington point is given by
 
         Luc = 0
         if nub > -0.78:
-            Luc = 6.9 + 20 * np.log10(np.sqrt((nub - 0.1) ** 2 + 1) + nub - 0.1)  # Eq (12), (20)
+            Luc = 6.9 + 20 * np.log10(
+                np.sqrt((nub - 0.1) ** 2 + 1) + nub - 0.1
+            )  # Eq (12), (20)
 
     # For Luc calculated using either (16) or (20), Bullington diffraction loss
     # for the path is given by
@@ -1739,12 +1916,23 @@ def dl_bull_att4(dtot, hte, hre, ap, f):
         c = (hte - hre) / (hte + hre)  # Eq (24d)
         m = 250 * dtot * dtot / (ap * (hte + hre))  # Eq (24e)
 
-        b = 2 * np.sqrt((m + 1.0) / (3.0 * m)) * np.cos(np.pi / 3.0 + 1.0 / 3.0 * np.arccos(3.0 * c / 2.0 * np.sqrt(3.0 * m / ((m + 1.0) ** 3))))  # Eq (24c)
+        b = (
+            2
+            * np.sqrt((m + 1.0) / (3.0 * m))
+            * np.cos(
+                np.pi / 3.0
+                + 1.0
+                / 3.0
+                * np.arccos(3.0 * c / 2.0 * np.sqrt(3.0 * m / ((m + 1.0) ** 3)))
+            )
+        )  # Eq (24c)
 
         dse1 = dtot / 2.0 * (1.0 + b)  # Eq (24a)
         dse2 = dtot - dse1  # Eq (24b)
 
-        hse = (hte - 500 * dse1 * dse1 / ap) * dse2 + (hre - 500 * dse2 * dse2 / ap) * dse1
+        hse = (hte - 500 * dse1 * dse1 / ap) * dse2 + (
+            hre - 500 * dse2 * dse2 / ap
+        ) * dse1
         hse = hse / dtot  # Eq (23)
 
         # calculate the difraction parameter for the smallest clearance height hse
@@ -1755,7 +1943,9 @@ def dl_bull_att4(dtot, hte, hre, ap, f):
 
         Lus = 0
         if numax > -0.78:
-            Lus = 6.9 + 20 * np.log10(np.sqrt((numax - 0.1) ** 2 + 1) + numax - 0.1)  # Eq (12), (106)
+            Lus = 6.9 + 20 * np.log10(
+                np.sqrt((numax - 0.1) ** 2 + 1) + numax - 0.1
+            )  # Eq (12), (106)
 
     else:  # d>=dlos, NLoS
         # Find the highest slope of the line from the transmitter antenna to the curved-Earth path.
@@ -1778,7 +1968,9 @@ def dl_bull_att4(dtot, hte, hre, ap, f):
 
         Lus = 0
         if nus > -0.78:
-            Lus = 6.9 + 20 * np.log10(np.sqrt((nus - 0.1) ** 2 + 1) + nus - 0.1)  # Eq (12), (111)
+            Lus = 6.9 + 20 * np.log10(
+                np.sqrt((nus - 0.1) ** 2 + 1) + nus - 0.1
+            )  # Eq (12), (111)
 
     # For Luc calculated using either (106) or (111), Bullington diffraction loss
     # for the path is given by
@@ -1808,11 +2000,14 @@ def beta0(phi, dtm, dlm):
     Rev   Date        Author                          Description
     -------------------------------------------------------------------------------
     v0    29SEP22     Ivica Stevanovic, OFCOM         Initial implementation
+    v1    18MAY26     Ivica Stevanovic, OFCOM         correcting a bug in equation (4) reported by torstewo
     """
 
     tau = 1 - np.exp(-(4.12 * 1e-4 * dlm**2.41))  # (3)
 
-    mu1 = (10 ** (-dtm / (16 - 6.6 * tau)) + 10 ** (-5 * (0.496 + 0.354 * tau))) ** 0.2  # (2)
+    mu1 = (
+        10 ** (-dtm / (16 - 6.6 * tau)) + 10 ** (-5 * (0.496 + 0.354 * tau))
+    ) ** 0.2  # (2)
 
     if mu1 > 1:
         mu1 = 1
@@ -1822,7 +2017,7 @@ def beta0(phi, dtm, dlm):
         # (4)
         b0 = 10 ** (-0.015 * abs(phi) + 1.67) * mu1 * mu4  # (5)
     else:
-        mu4 = mu1 ^ (0.3)  # (4)
+        mu4 = mu1 ** (0.3)  # (4)
         b0 = 4.17 * mu1 * mu4  # (5)
 
     return b0
@@ -1858,6 +2053,7 @@ def stdDev(f, h, R, wa):
 
     return sigmaLoc
 
+
 def interp2(matrix_map, lon, lat, lon_spacing, lat_spacing):
     """
     Bi-linear interpolation of data contained in 2D matrix map at point (lon,lat)
@@ -1865,14 +2061,12 @@ def interp2(matrix_map, lon, lat, lon_spacing, lat_spacing):
     It assumes that lon goes from 0 to 360 deg and lat goes from 90 to -90 deg
     """
 
-    
     latitudeOffset = 90.0 - lat
     longitudeOffset = lon
-    
-    if (lon < 0.0):
+
+    if lon < 0.0:
         longitudeOffset = lon + 360.0
 
-    
     sizeY, sizeX = matrix_map.shape
 
     latitudeIndex = int(latitudeOffset / lat_spacing)
@@ -1888,7 +2082,10 @@ def interp2(matrix_map, lon, lat, lon_spacing, lat_spacing):
 
     interpolatedHeight1 = (longitudeFraction * (value_ur - value_ul)) + value_ul
     interpolatedHeight2 = (longitudeFraction * (value_lr - value_ll)) + value_ll
-    interpolatedHeight3 = latitudeFraction * (interpolatedHeight2 - interpolatedHeight1) + interpolatedHeight1
+    interpolatedHeight3 = (
+        latitudeFraction * (interpolatedHeight2 - interpolatedHeight1)
+        + interpolatedHeight1
+    )
 
     return interpolatedHeight3
 
@@ -2039,7 +2236,9 @@ def read_sg3_measurements2(filename, fileformat):
                 DN = float(dummy[1])
                 sg3db.DN = DN
 
-            if strcmp(dummy[0], "Average annual sea-level surface refractivity No (N-units):"):
+            if strcmp(
+                dummy[0], "Average annual sea-level surface refractivity No (N-units):"
+            ):
                 N0 = float(dummy[1])
                 sg3db.N0 = N0
 
@@ -2066,13 +2265,17 @@ def read_sg3_measurements2(filename, fileformat):
                             value = np.nan
                             if dummy[3] != "":
                                 value = float(dummy[3])
-                            sg3db.h_ground_cover = np.append(sg3db.h_ground_cover, value)
+                            sg3db.h_ground_cover = np.append(
+                                sg3db.h_ground_cover, value
+                            )
                             if (len(dummy)) > 4:
                                 # Land=4, Coast=3, Sea=1
                                 value = np.nan
                                 if dummy[4] != "":
                                     value = float(dummy[4])
-                                sg3db.radio_met_code = np.append(sg3db.radio_met_code, value)
+                                sg3db.radio_met_code = np.append(
+                                    sg3db.radio_met_code, value
+                                )
 
             ## read the field strength
             if strcmp(dummy[0], "Frequency"):
@@ -2097,7 +2300,9 @@ def read_sg3_measurements2(filename, fileformat):
                     # check if the line after that contains only one number
                     # or the data
                     count = count + 1
-                    readLine = lines[count]  # the line with the number of records or not
+                    readLine = lines[
+                        count
+                    ]  # the line with the number of records or not
                     dummy = readLine.split(",")
                     if len(dummy) > 2:
                         # if isempty([dummy{2:end}])
@@ -2240,14 +2445,18 @@ def read_sg3_measurements2(filename, fileformat):
                     value = np.nan
                     if dummy[col] != "":
                         value = float(dummy[col])
-                    sg3db.MeasuredFieldStrength = np.append(sg3db.MeasuredFieldStrength, value)
+                    sg3db.MeasuredFieldStrength = np.append(
+                        sg3db.MeasuredFieldStrength, value
+                    )
 
                     #
                     col = 17
                     value = np.nan
                     if dummy[col] != "":
                         value = float(dummy[col])
-                    sg3db.BasicTransmissionLoss = np.append(sg3db.BasicTransmissionLoss, value)
+                    sg3db.BasicTransmissionLoss = np.append(
+                        sg3db.BasicTransmissionLoss, value
+                    )
 
                     #
                     if len(dummy) > 18:
@@ -2256,17 +2465,25 @@ def read_sg3_measurements2(filename, fileformat):
                         value = np.nan
                         if dummy[col] != "":
                             value = float(dummy[col])
-                        sg3db.RxHeightGainGroup = np.append(sg3db.RxHeightGainGroup, value)
+                        sg3db.RxHeightGainGroup = np.append(
+                            sg3db.RxHeightGainGroup, value
+                        )
 
                         col = 19
                         value = np.nan
                         if dummy[col] != "":
                             value = float(dummy[col])
-                        sg3db.IsTopHeightInGroup = np.append(sg3db.IsTopHeightInGroup, value)
+                        sg3db.IsTopHeightInGroup = np.append(
+                            sg3db.IsTopHeightInGroup, value
+                        )
 
                     else:
-                        sg3db.RxHeightGainGroup = np.append(sg3db.RxHeightGainGroup, np.nan)
-                        sg3db.IsTopHeightInGroup = np.append(sg3db.IsTopHeightInGroup, np.nan)
+                        sg3db.RxHeightGainGroup = np.append(
+                            sg3db.RxHeightGainGroup, np.nan
+                        )
+                        sg3db.IsTopHeightInGroup = np.append(
+                            sg3db.IsTopHeightInGroup, np.nan
+                        )
 
                     kindex = kindex + 1
 
@@ -2353,7 +2570,12 @@ class SG3DB:
     def __str__(self):
         userChoiceInt = self.userChoiceInt
         out = "The following input data is defined:" + "\n"
-        out = out + " PTx            = " + str(self.TransmittedPower[userChoiceInt]) + "\n"
+        out = (
+            out
+            + " PTx            = "
+            + str(self.TransmittedPower[userChoiceInt])
+            + "\n"
+        )
         out = out + " f              = " + str(self.frequency[userChoiceInt]) + "\n"
         out = out + " t              = " + str(self.TimePercent[userChoiceInt]) + "\n"
         out = out + " q              = " + str(self.q) + "\n"
@@ -2370,7 +2592,12 @@ class SG3DB:
         out = out + " eff2           = " + str(self.tca) + "\n"
         out = out + " debug          = " + str(self.debug) + "\n"
         # out = out + " fid_log        = " + str(self.fid_log           ) + "\n"
-        out = out + " Predicted Field Strength        = " + str(self.PredictedFieldStrength) + "\n"
+        out = (
+            out
+            + " Predicted Field Strength        = "
+            + str(self.PredictedFieldStrength)
+            + "\n"
+        )
 
         return out
 

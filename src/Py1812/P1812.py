@@ -5,6 +5,7 @@ Created on Tue 27 Sep 2022
 Modified on 25 FEB 2026: Removed obsolete argument Ct
 Modified on 16 MAR 2026: Included optional arguments Gtx and Grx
 Modified on 18 MAY 2026: Patch resolving issue #9
+Modified on 28 AUG 2026: Fixing issues #11 and #13
 
 @author: eeveetza
 """
@@ -22,8 +23,8 @@ with np.load(files("Py1812").joinpath("P1812.npz")) as DigitalMapsNpz:
 
 def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kwargs):
     """
-    P1812.bt_loss basic transmission loss according to P.1812-6
-    Lb, Ep = P1812.bt_lossbt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r)
+    P1812.bt_loss basic transmission loss according to P.1812-8
+    Lb, Ep = P1812.bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r)
 
     This is the MAIN function that computes the basic transmission loss not exceeded for p% time
     and pL% locations, including additional losses due to terminal surroundings
@@ -99,7 +100,7 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
           25FEB26     Ivica Stevanovic, OFCOM         Removed obsolete argument Ct
           16MAR26     Ivica Stevanovic, OFCOM         Introduced optional arguments Gtx and Grx
           18MAY26     Ivica Stevanovic, OFCOM         Fixed a bug with ^ instead of ** as proposed by https://github.com/torstewo
-
+          28AUG26     Ivica Stevanovic, OFCOM         Use .copy() to avoid unintended array aliasing as proposed by https://github.com/drcaguiar
 
     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
@@ -440,7 +441,7 @@ def bt_loss(f, p, d, h, R, zone, htg, hrg, pol, phi_t, phi_r, lam_t, lam_r, **kw
     # Calculate a notional basic transmission loss associated with diffraction
     # and LoS or ducting/layer reflection enhancements
 
-    Lbda = Lbd
+    Lbda = Lbd.copy()
 
     if Lminbap <= Lbd[0]:
         Lbda[0] = Lminbap + (Lbd[0] - Lminbap) * Fk
